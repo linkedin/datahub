@@ -1,4 +1,4 @@
-if (process.env.REACT_APP_MOCK === 'true') {
+if (process.env.REACT_APP_MOCK === 'true' || process.env.REACT_APP_MOCK === 'cy') {
     // no proxy needed, MirageJS will intercept all http requests
     module.exports = function () {};
 } else {

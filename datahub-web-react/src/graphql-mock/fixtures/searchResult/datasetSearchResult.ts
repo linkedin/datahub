@@ -6,13 +6,15 @@ import { filterEntityByPath, toFlatPaths } from '../browsePathHelper';
 
 type SearchResultArg = DatasetEntityArg;
 
-const searchResult = ({ platform, origin, path }: SearchResultArg) => (): SearchResult => {
-    return {
-        entity: datasetEntity({ platform, origin, path }),
-        matchedFields: [],
-        __typename: 'SearchResult',
+const searchResult =
+    ({ platform, origin, path }: SearchResultArg) =>
+    (): SearchResult => {
+        return {
+            entity: datasetEntity({ platform, origin, path }),
+            matchedFields: [],
+            __typename: 'SearchResult',
+        };
     };
-};
 
 export const datasetBrowsePaths: EntityBrowsePath[] = [
     {

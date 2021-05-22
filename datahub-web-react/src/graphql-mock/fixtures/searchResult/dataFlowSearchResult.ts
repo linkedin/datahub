@@ -6,13 +6,15 @@ import { generateData } from './dataGenerator';
 
 type SearchResultArg = DataFlowEntityArg;
 
-const searchResult = ({ orchestrator, cluster }: SearchResultArg) => (): SearchResult => {
-    return {
-        entity: dataFlowEntity({ orchestrator, cluster }),
-        matchedFields: [],
-        __typename: 'SearchResult',
+const searchResult =
+    ({ orchestrator, cluster }: SearchResultArg) =>
+    (): SearchResult => {
+        return {
+            entity: dataFlowEntity({ orchestrator, cluster }),
+            matchedFields: [],
+            __typename: 'SearchResult',
+        };
     };
-};
 
 export const dataFlowBrowsePaths: EntityBrowsePath[] = [
     {

@@ -6,7 +6,7 @@ import { buildASTSchema } from 'graphql';
 const gmsSchema = loader('../../../datahub-graphql-core/src/main/resources/gms.graphql');
 const feSchema = loader('../../../datahub-frontend/conf/datahub-frontend.graphql');
 
-export const graphQLSchemaAST = gql`
+const graphQLSchemaAST = gql`
     ${gmsSchema}
     ${feSchema}
 `;
