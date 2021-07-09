@@ -104,11 +104,11 @@ public class Neo4jGraphService implements GraphService {
 
     final RelationshipDirection relationshipDirection = relationshipFilter.getDirection();
 
-    String matchTemplate = "MATCH (src%s %s)-[r%s %s]-(dest%s %s) RETURN dest";
+    String matchTemplate = "MATCH (src%s %s)-[r%s %s]-(dest%s %s) RETURN dest%s";
     if (relationshipDirection == RelationshipDirection.INCOMING) {
-      matchTemplate = "MATCH (src%s %s)<-[r%s %s]-(dest%s %s) RETURN dest";
+      matchTemplate = "MATCH (src%s %s)<-[r%s %s]-(dest%s %s) RETURN dest%s";
     } else if (relationshipDirection == RelationshipDirection.OUTGOING) {
-      matchTemplate = "MATCH (src%s %s)-[r%s %s]->(dest%s %s) RETURN dest";
+      matchTemplate = "MATCH (src%s %s)-[r%s %s]->(dest%s %s) RETURN dest%s";
     }
 
     String relationshipTypeFilter = "";
@@ -118,7 +118,7 @@ public class Neo4jGraphService implements GraphService {
 
     String statementString =
         String.format(matchTemplate, sourceType, srcCriteria, relationshipTypeFilter, edgeCriteria,
-            destinationType, destCriteria);
+            destinationType, destCriteria, destinationType);
 
     statementString += " SKIP $offset LIMIT $count";
 
