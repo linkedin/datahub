@@ -212,6 +212,7 @@ entry_points = {
         "snowflake = datahub.ingestion.source.snowflake:SnowflakeSource",
         "snowflake-usage = datahub.ingestion.source.snowflake_usage:SnowflakeUsageSource",
         "superset = datahub.ingestion.source.superset:SupersetSource",
+        "openapi = datahub.ingestion.source.openapi:OpenApiSource",
     ],
     "datahub.ingestion.sink.plugins": [
         "file = datahub.ingestion.sink.file:FileSink",

@@ -30,35 +30,33 @@ If you run into an error, try checking the [_common setup issues_](./developing.
 
 We use a plugin architecture so that you can install only the dependencies you actually need.
 
-| Plugin Name     | Install Command                                            | Provides                            |
-| --------------- | ---------------------------------------------------------- | ----------------------------------- |
-| file            | _included by default_                                      | File source and sink                |
-| console         | _included by default_                                      | Console sink                        |
-| athena          | `pip install 'acryl-datahub[athena]'`                      | AWS Athena source                   |
-| bigquery        | `pip install 'acryl-datahub[bigquery]'`                    | BigQuery source                     |
-| bigquery-usage  | `pip install 'acryl-datahub[bigquery-usage]'`              | BigQuery usage statistics source    |
-| feast           | `pip install 'acryl-datahub[feast]'`                       | Feast source                        |
-| glue            | `pip install 'acryl-datahub[glue]'`                        | AWS Glue source                     |
-| hive            | `pip install 'acryl-datahub[hive]'`                        | Hive source                         |
-| mssql           | `pip install 'acryl-datahub[mssql]'`                       | SQL Server source                   |
-| mysql           | `pip install 'acryl-datahub[mysql]'`                       | MySQL source                        |
-| oracle          | `pip install 'acryl-datahub[oracle]'`                      | Oracle source                       |
-| postgres        | `pip install 'acryl-datahub[postgres]'`                    | Postgres source                     |
-| redshift        | `pip install 'acryl-datahub[redshift]'`                    | Redshift source                     |
-| sagemaker       | `pip install 'acryl-datahub[sagemaker]'`                   | AWS SageMaker source                |
-| sqlalchemy      | `pip install 'acryl-datahub[sqlalchemy]'`                  | Generic SQLAlchemy source           |
-| snowflake       | `pip install 'acryl-datahub[snowflake]'`                   | Snowflake source                    |
-| snowflake-usage | `pip install 'acryl-datahub[snowflake-usage]'`             | Snowflake usage statistics source   |
-| superset        | `pip install 'acryl-datahub[superset]'`                    | Superset source                     |
-| mongodb         | `pip install 'acryl-datahub[mongodb]'`                     | MongoDB source                      |
-| ldap            | `pip install 'acryl-datahub[ldap]'` ([extra requirements]) | LDAP source                         |
-| looker          | `pip install 'acryl-datahub[looker]'`                      | Looker source                       |
-| lookml          | `pip install 'acryl-datahub[lookml]'`                      | LookML source, requires Python 3.7+ |
-| kafka           | `pip install 'acryl-datahub[kafka]'`                       | Kafka source                        |
-| druid           | `pip install 'acryl-datahub[druid]'`                       | Druid Source                        |
-| dbt             | _no additional dependencies_                               | dbt source                          |
-| datahub-rest    | `pip install 'acryl-datahub[datahub-rest]'`                | DataHub sink over REST API          |
-| datahub-kafka   | `pip install 'acryl-datahub[datahub-kafka]'`               | DataHub sink over Kafka             |
+| Plugin Name   | Install Command                                            | Provides                            |
+| ------------- | ---------------------------------------------------------- | ----------------------------------- |
+| file          | _included by default_                                      | File source and sink                |
+| console       | _included by default_                                      | Console sink                        |
+| athena        | `pip install 'acryl-datahub[athena]'`                      | AWS Athena source                   |
+| bigquery      | `pip install 'acryl-datahub[bigquery]'`                    | BigQuery source                     |
+| feast         | `pip install 'acryl-datahub[feast]'`                       | Feast source                        |
+| glue          | `pip install 'acryl-datahub[glue]'`                        | AWS Glue source                     |
+| hive          | `pip install 'acryl-datahub[hive]'`                        | Hive source                         |
+| mssql         | `pip install 'acryl-datahub[mssql]'`                       | SQL Server source                   |
+| mysql         | `pip install 'acryl-datahub[mysql]'`                       | MySQL source                        |
+| oracle        | `pip install 'acryl-datahub[oracle]'`                      | Oracle source                       |
+| postgres      | `pip install 'acryl-datahub[postgres]'`                    | Postgres source                     |
+| redshift      | `pip install 'acryl-datahub[redshift]'`                    | Redshift source                     |
+| sqlalchemy    | `pip install 'acryl-datahub[sqlalchemy]'`                  | Generic SQLAlchemy source           |
+| snowflake     | `pip install 'acryl-datahub[snowflake]'`                   | Snowflake source                    |
+| superset      | `pip install 'acryl-datahub[superset]'`                    | Superset source                     |
+| mongodb       | `pip install 'acryl-datahub[mongodb]'`                     | MongoDB source                      |
+| ldap          | `pip install 'acryl-datahub[ldap]'` ([extra requirements]) | LDAP source                         |
+| looker        | `pip install 'acryl-datahub[looker]'`                      | Looker source                       |
+| lookml        | `pip install 'acryl-datahub[lookml]'`                      | LookML source, requires Python 3.7+ |
+| kafka         | `pip install 'acryl-datahub[kafka]'`                       | Kafka source                        |
+| druid         | `pip install 'acryl-datahub[druid]'`                       | Druid Source                        |
+| dbt           | _no additional dependencies_                               | dbt source                          |
+| datahub-openapi | `pip install 'acryl-datahub[datahub-openapi]'`               | OpenApi Source             |
+| datahub-rest  | `pip install 'acryl-datahub[datahub-rest]'`                | DataHub sink over REST API          |
+| datahub-kafka | `pip install 'acryl-datahub[datahub-kafka]'`               | DataHub sink over Kafka             |
 
 These plugins can be mixed and matched as desired. For example:
 
@@ -138,6 +136,89 @@ datahub ingest -c ./examples/recipes/mssql_to_datahub.yml
 A number of recipes are included in the examples/recipes directory.
 
 ## Sources
+
+### OpenApi Metadata `openapi`
+
+This plugin is meant to gather dataset-like informations about OpenApi Endpoints.
+
+As example, if by calling GET at the endpoint at `https://test_endpoint.com/users/by_id/1` you obtain as result:
+```JSON
+     {"user": "albert_physics",
+      "name": "Albert Einstein",
+      "job": "nature declutterer"}
+```
+
+in Datahub you will see a dataset called `test_endpoint/users` which contains as fields `user`, `name` and `job`.
+
+Example of ingestion file:
+
+```yml
+source:
+  type: openapi
+  config:
+    name: test_endpoint # this name will appear in DatHub
+    url: https://test_endpoint.com/
+    swagger_file: classicapi/doc/swagger.json  # where to search for the OpenApi definitions
+    get_token: True  # optional, if you need to get an authentication token beforehand 
+    username: your_username  # optional
+    password: your_password  # optional
+    forced_examples:  # optionals
+      /accounts/groupname/{name}: test
+      /accounts/username/{name}: test
+    ignore_endpoints: [/ignore/this, /ignore/that, /also/that_other]  # optional, the endpoints to ignore
+
+sink:
+  type: "datahub-rest"
+  config:
+    server: 'http://localhost:8080'
+```
+
+The dataset metadata should be defined directly in the Swagger file, section `["example"]`. If this is not true, the following procedures will take place.
+
+#### Getting dataset metadata from `forced_example`
+
+You can specify the example in the `forced_examples` part of the
+configuration file. In the example, when parsing the endpoint `/accounts/groupname/{name}`, 
+the plugin will call the URL:
+
+    https://second_serviceboh-vd.ch/accounts/groupname/test
+
+#### Automatically recorded examples
+
+The OpenApi specifications set the listing endpoints just before the detailed ones. 
+So, in the list of the methods, you will find
+
+    https:///best_servcice.edu-vd.ch/colors
+
+before
+
+    https://best_servcice.edu-vd.ch/colors/{color}
+
+This plugin is set to automatically keep an example of the data given by the first URL,
+which with some probability will include an example of attribute needed by the second.
+
+So, if by calling GET to the first URL you get as response:
+
+    {"pantone code": 100,
+     "color": "yellow",
+     ...}
+
+the `"color": "yellow"`  part will be used to complete the second link, which
+will become:
+
+    https://best_servcice.edu-vd.ch/colors/yellow
+
+to get back the metadata.
+
+#### Automatic guessing of IDs
+
+If no useful example is found, a second procedure will try to guess the IDs. So if we have:
+
+    https:///best_servcice.edu-vd.ch/colors/{colorID}
+
+the tool will try to put a number one (1) at the parameter place
+
+    https://best_servcice.edu-vd.ch/colors/1
 
 ### Kafka Metadata `kafka`
 
