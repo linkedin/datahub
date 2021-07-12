@@ -1,5 +1,6 @@
+from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Any, DefaultDict, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from datahub.emitter import mce_builder
 from datahub.ingestion.api.workunit import MetadataWorkUnit
@@ -249,6 +250,20 @@ class SageMakerJob:
 
 
 @dataclass
+class ModelJob:
+    """
+    Intermediate representation of a job's related models. Subsequently used by the SageMaker jobs ingestion framework.
+    """
+
+    job_urn: str
+    job_direction: str  # 'training' or 'downstream'
+
+    # add hash method so we can store these in a set
+    def __hash__(self):
+        return hash((self.job_urn, self.job_direction))
+
+
+@dataclass
 class JobProcessor:
     """
     Job ingestion module, called by top-level SageMaker ingestion handler.
@@ -264,6 +279,16 @@ class JobProcessor:
     # translators between ARNs and job names (represented as tuples of (job_type, job_name))
     arn_to_name: Dict[str, Tuple[str, str]] = field(default_factory=dict)
     name_to_arn: Dict[Tuple[str, str], str] = field(default_factory=dict)
+
+    # map from model image file path to jobs referencing the model
+    model_data_to_jobs: DefaultDict[str, Set[ModelJob]] = field(
+        default_factory=lambda: defaultdict(set)
+    )
+
+    # map from model name to jobs referencing the model
+    model_name_to_jobs: DefaultDict[str, Set[ModelJob]] = field(
+        default_factory=lambda: defaultdict(set)
+    )
 
     def get_all_jobs(
         self,
@@ -502,6 +527,17 @@ class JobProcessor:
             JOB_TYPE,
         )
 
+        model_containers = job.get("BestCandidate", {}).get("InferenceContainers", [])
+
+        for model_container in model_containers:
+
+            model_data_url = model_container.get("ModelDataUrl")
+
+            if model_data_url is not None:
+                self.model_data_to_jobs[model_data_url].add(
+                    ModelJob(job_urn=job_snapshot.urn, job_direction="training")
+                )
+
         return SageMakerJob(
             job_name=job_name,
             job_arn=job_arn,
@@ -620,14 +656,15 @@ class JobProcessor:
                     f"Unable to find ARN for compilation job {compilation_job_name} produced by edge packaging job {arn}",
                 )
 
-        # TODO: see if we can link models here (will require adding some aspect to either jobs or models)
-        # model: Optional[str] = job.get("ModelName")
-        # model_version: Optional[str] = job.get("ModelVersion")
-
         job_snapshot, job_name, job_arn = self.create_common_job_snapshot(
             job,
             JOB_TYPE,
         )
+
+        if job.get("ModelName") is not None:
+            self.model_name_to_jobs[job["ModelName"]].add(
+                ModelJob(job_urn=job_snapshot.urn, job_direction="downstream")
+            )
 
         return SageMakerJob(
             job_name=job_name,
@@ -939,6 +976,12 @@ class JobProcessor:
             JOB_TYPE,
         )
 
+        model_data_url = job.get("ModelArtifacts", {}).get("S3ModelArtifacts")
+        if model_data_url is not None:
+            self.model_data_to_jobs[model_data_url].add(
+                ModelJob(job_urn=job_snapshot.urn, job_direction="training")
+            )
+
         return SageMakerJob(
             job_name=job_name,
             job_arn=job_arn,
@@ -1016,6 +1059,11 @@ class JobProcessor:
             job,
             JOB_TYPE,
         )
+
+        if job.get("ModelName") is not None:
+            self.model_name_to_jobs[job["ModelName"]].add(
+                ModelJob(job_urn=job_snapshot.urn, job_direction="downstream")
+            )
 
         return SageMakerJob(
             job_name=job_name,
